@@ -6,6 +6,10 @@ class StudentProvider with ChangeNotifier {
 
   List<Map<String, dynamic>> students = [];
 
+  bool _isLoading = false; 
+
+  bool get isLoading => _isLoading; 
+
   // Fetch students of a course
   Future<void> fetchStudents(String courseId) async {
     final snap = await _db

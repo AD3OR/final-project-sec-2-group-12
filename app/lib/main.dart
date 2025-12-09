@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'Gazi/students.dart';
-import 'Gazi/att.dart';
 
 import 'firebase_options.dart';
 
@@ -10,6 +8,8 @@ import 'firebase_options.dart';
 import 'providers/student_provider.dart';
 import 'providers/attendance_provider.dart';
 
+// Screens
+import 'home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,12 +34,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Attendance App',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        ),
-
-        // OPEN RESPECTIVE PAGE DIRECTLY
-        home: AttendancePage(courseId: "COURSE_001"),
+        home: const HomePage(),
       ),
     );
   }
