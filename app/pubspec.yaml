@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-<<<<<<< Updated upstream
     
   # adding provider
   provider: ^6.1.2
@@ -23,12 +22,7 @@ dependencies:
   firebase_core: 
   firebase_auth: ^5.0.0
   cloud_firestore:
-=======
-  cupertino_icons: ^1.0.5
-  provider: ^6.0.5
-  firebase_core: ^2.11.0
-  cloud_firestore: ^4.8.0
->>>>>>> Stashed changes
+
 
 dev_dependencies:
   flutter_test:
