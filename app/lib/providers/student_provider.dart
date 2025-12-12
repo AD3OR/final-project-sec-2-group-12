@@ -6,7 +6,7 @@ class StudentProvider with ChangeNotifier {
 
   List<Map<String, dynamic>> students = [];
 
-  bool _isLoading = false; 
+  final bool _isLoading = false; 
 
   bool get isLoading => _isLoading; 
 
