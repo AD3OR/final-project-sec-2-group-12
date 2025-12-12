@@ -1,7 +1,15 @@
+<<<<<<< Updated upstream
+=======
+// ignore: depend_on_referenced_packages
+//import 'package:firebase_options.dart';
+import 'package:final_project_csc464_p006/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
+>>>>>>> Stashed changes
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
+<<<<<<< Updated upstream
 import 'firebase_options.dart';
 
 // Providers
@@ -12,12 +20,19 @@ import 'providers/attendance_provider.dart';
 import 'home.dart';
 
 void main() async {
+=======
+void main() async {
+  // Firebase initialization
+>>>>>>> Stashed changes
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
   runApp(const MyApp());
 }
 
