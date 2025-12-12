@@ -42,7 +42,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyAibFXFz9v7CyNT48GMRZAx-hiPBk3Hw_Y',
-    appId: '1:728415413382:web:97f9c7643812f5918d9d07',
+    appId: '1:728415413382:web:0ae5b332c80b8a468d9d07',
     messagingSenderId: '728415413382',
     projectId: 'csc464-p006',
     authDomain: 'csc464-p006.firebaseapp.com',
@@ -77,10 +77,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyAibFXFz9v7CyNT48GMRZAx-hiPBk3Hw_Y',
-    appId: '1:728415413382:web:0ae5b332c80b8a468d9d07',
+    appId: '1:728415413382:web:6f2be1744effd9b08d9d07',
     messagingSenderId: '728415413382',
     projectId: 'csc464-p006',
     authDomain: 'csc464-p006.firebaseapp.com',
     storageBucket: 'csc464-p006.firebasestorage.app',
   );
+
 }
