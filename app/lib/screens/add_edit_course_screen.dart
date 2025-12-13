@@ -15,29 +15,16 @@ class AddEditCourseScreen extends StatefulWidget {
 
 class _AddEditCourseScreenState extends State<AddEditCourseScreen> {
   final _formKey = GlobalKey<FormState>();
-
   final _nameCtrl = TextEditingController();
   final _codeCtrl = TextEditingController();
-  final _startCtrl = TextEditingController();
-  final _endCtrl = TextEditingController();
-
-  String _day = "Monday";
-  final List<String> _days = [
-    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-  ];
-
-  bool _isSaving = false;
+  bool _saving = false;
 
   @override
   void initState() {
     super.initState();
     if (widget.editingCourse != null) {
-      final c = widget.editingCourse!;
-      _nameCtrl.text = c.name;
-      _codeCtrl.text = c.code;
-      _day = c.day;
-      _startCtrl.text = c.startTime;
-      _endCtrl.text = c.endTime;
+      _nameCtrl.text = widget.editingCourse!.name;
+      _codeCtrl.text = widget.editingCourse!.code;
     }
   }
 
@@ -45,16 +32,13 @@ class _AddEditCourseScreenState extends State<AddEditCourseScreen> {
   void dispose() {
     _nameCtrl.dispose();
     _codeCtrl.dispose();
-    _startCtrl.dispose();
-    _endCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSaving = true);
-
+    setState(() => _saving = true);
     final provider = Provider.of<CourseProvider>(context, listen: false);
 
     try {
@@ -62,28 +46,17 @@ class _AddEditCourseScreenState extends State<AddEditCourseScreen> {
         await provider.addCourse(
           _nameCtrl.text.trim(),
           _codeCtrl.text.trim(),
-          _day,
-          _startCtrl.text.trim(),
-          _endCtrl.text.trim(),
         );
       } else {
         await provider.updateCourse(
           widget.editingCourse!.id,
           _nameCtrl.text.trim(),
           _codeCtrl.text.trim(),
-          _day,
-          _startCtrl.text.trim(),
-          _endCtrl.text.trim(),
         );
       }
       if (mounted) Navigator.pop(context);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Error: $e")));
-      }
     } finally {
-      if (mounted) setState(() => _isSaving = false);
+      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -111,7 +84,7 @@ class _AddEditCourseScreenState extends State<AddEditCourseScreen> {
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
             children: [
               TextFormField(
                 controller: _nameCtrl,
@@ -119,42 +92,17 @@ class _AddEditCourseScreenState extends State<AddEditCourseScreen> {
                 validator: (v) => v == null || v.isEmpty ? "Required" : null,
               ),
               const SizedBox(height: 12),
-
               TextFormField(
                 controller: _codeCtrl,
                 decoration: field("Course code"),
                 validator: (v) => v == null || v.isEmpty ? "Required" : null,
               ),
-              const SizedBox(height: 12),
-
-              DropdownButtonFormField(
-                value: _day,
-                decoration: field("Day of week"),
-                items: _days.map((d) {
-                  return DropdownMenuItem(value: d, child: Text(d));
-                }).toList(),
-                onChanged: (v) => setState(() => _day = v!),
-              ),
-              const SizedBox(height: 12),
-
-              TextFormField(
-                controller: _startCtrl,
-                decoration: field("Start time, example: 09:00"),
-                validator: (v) => v == null || v.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: 12),
-
-              TextFormField(
-                controller: _endCtrl,
-                decoration: field("End time, example: 10:30"),
-                validator: (v) => v == null || v.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: 20),
-
-              _isSaving
-                  ? Center(child: CircularProgressIndicator(color: c2))
+              const SizedBox(height: 24),
+              _saving
+                  ? CircularProgressIndicator(color: c2)
                   : SizedBox(
                       height: 48,
+                      width: double.infinity,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: c2,
@@ -162,9 +110,9 @@ class _AddEditCourseScreenState extends State<AddEditCourseScreen> {
                               borderRadius: BorderRadius.circular(10)),
                         ),
                         onPressed: _save,
-                        child: Text(editing ? "Save changes" : "Create course"),
+                        child: Text(editing ? "Save Changes" : "Create Course"),
                       ),
-                    )
+                    ),
             ],
           ),
         ),

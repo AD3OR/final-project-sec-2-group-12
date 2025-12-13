@@ -1,8 +1,9 @@
-// lib/widgets/routine_tile.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/routine.dart';
 import '../providers/routine_provider.dart';
+import '../theme/colors.dart';
 import '../screens/add_edit_routine_screen.dart';
 
 class RoutineTile extends StatelessWidget {
@@ -12,50 +13,55 @@ class RoutineTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<RoutineProvider>(context, listen: false);
-    return Card(
-      child: ListTile(
-        title: Text(routine.name),
-        subtitle: Text('${routine.day}, ${routine.startTime} - ${routine.endTime}'),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AddEditRoutineScreen(editingRoutine: routine),
-                  ),
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () async {
-                final confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text('Delete routine'),
-                    content: Text('Delete "${routine.name}"?'),
-                    actions: [
-                      TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-                      TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
-                    ],
-                  ),
-                );
-                if (confirmed == true) {
-                  try {
-                    await provider.deleteRoutine(routine.id);
-                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Routine deleted')));
-                  } catch (e) {
-                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
-                  }
-                }
-              },
-            ),
-          ],
-        ),
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: c4,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                routine.day,
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Text("${routine.startTime} - ${routine.endTime}"),
+            ],
+          ),
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit),
+                color: c2,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AddEditRoutineScreen(
+                        editingRoutine: routine,
+                        courseId: routine.courseId,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                color: Colors.redAccent,
+                onPressed: () async {
+                  await provider.deleteRoutine(routine.id);
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
