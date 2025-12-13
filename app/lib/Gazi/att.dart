@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/student_provider.dart';
-import '../providers/attendance_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
+// Color Palette
 const Color c1 = Color(0xFF696D7D);
 const Color c2 = Color(0xFF6F9283);
 const Color c3 = Color(0xFF8D9F87);
@@ -10,92 +9,118 @@ const Color c4 = Color(0xFFCDC6A5);
 const Color c5 = Color(0xFFF0DCCA);
 
 class AttendancePage extends StatefulWidget {
-  final String courseId;
   const AttendancePage({super.key, required this.courseId});
+  final String courseId;
 
   @override
   State<AttendancePage> createState() => _AttendancePageState();
 }
 
 class _AttendancePageState extends State<AttendancePage> {
-  String today = DateTime.now().toString().split(" ")[0];
-
-  @override
-  void initState() {
-    super.initState();
-
-    final sp = Provider.of<StudentProvider>(context, listen: false);
-    final ap = Provider.of<AttendanceProvider>(context, listen: false);
-
-    sp.fetchStudents(widget.courseId);
-    ap.loadAttendance(widget.courseId, today);
-  }
+  Map<int, bool> attendanceStatus = {}; // studentId → present/absent
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: c4,
+      backgroundColor: c5,
       appBar: AppBar(
         backgroundColor: c2,
-        title: Text(
-          "Attendance ($today)",
-          style: const TextStyle(color: c5),
+        title: const Text(
+          "Take Attendance",
+          style: TextStyle(color: Colors.white),
         ),
-        iconTheme: const IconThemeData(color: c5),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: c2,
-        child: const Icon(Icons.save, color: c5),
-        onPressed: () {
-          Provider.of<AttendanceProvider>(context, listen: false)
-              .saveAttendance(widget.courseId, today);
-        },
-      ),
-      body: Consumer2<StudentProvider, AttendanceProvider>(
-        builder: (context, sp, ap, _) {
-          return ListView.builder(
-            itemCount: sp.students.length,
-            itemBuilder: (_, i) {
-              final student = sp.students[i];
-              final id = student['studentId'];
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                child: ListTile(
-                  tileColor: c4.withOpacity(0.8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  title: Text(
-                    student['studentName'],
-                    style: const TextStyle(color: c1, fontWeight: FontWeight.bold),
-                  ),
-                  trailing: ToggleButtons(
-                    renderBorder: true,
-                    borderColor: c1,
-                    selectedColor: c5,
-                    fillColor: c3,
-                    selectedBorderColor: c1,
-                    splashColor: c2.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(6.0),
-                    constraints: const BoxConstraints(minHeight: 36.0, minWidth: 48.0),
-                    isSelected: [
-                      ap.attendanceStatus[id] == "Present",
-                      ap.attendanceStatus[id] == "Absent"
-                    ],
-                    onPressed: (index) {
-                      ap.mark(id, index == 0 ? "Present" : "Absent");
-                    },
-                    children: const [
-                      Text("P"),
-                      Text("A"),
-                    ],
-                  ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection("students").snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final students =
+              snapshot.data?.docs ?? []; // handle null snapshot.data
+
+          print("Snapshot data: ${snapshot.data?.docs.map((d) => d.data())}");
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: students.length,
+            itemBuilder: (context, index) {
+              var doc = students[index];
+              var student =
+                  doc.data() as Map<String, dynamic>?; // make nullable
+              if (student == null) return const SizedBox(); // skip if null
+
+              String studentName = student['studentName'] ?? 'No Name';
+              int studentId = student['id'] ?? 0;
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: c3,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            studentName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            "ID: $studentId",
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Checkbox(
+                      activeColor: c1,
+                      value: attendanceStatus[studentId] ?? false,
+                      onChanged: (value) {
+                        setState(() {
+                          attendanceStatus[studentId] = value!;
+                        });
+                      },
+                    ),
+                  ],
                 ),
               );
             },
           );
         },
+      ),
+
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(20),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: c1,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          onPressed: () {
+            // will implement later
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Attendance recorded (mock).")),
+            );
+          },
+          child: const Text(
+            "Submit Attendance",
+            style: TextStyle(fontSize: 18, color: Colors.white),
+          ),
+        ),
       ),
     );
   }
