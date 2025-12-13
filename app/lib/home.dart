@@ -11,9 +11,10 @@ import 'providers/routine_provider.dart';
 import 'Gazi/students.dart';
 import 'Gazi/att.dart';
 
-// Course screen
+// Course & routine screens
 import 'screens/course_list_screen.dart';
-import 'screens/timetable_screen.dart'; // new import
+import 'screens/course_select_routine_screen.dart';
+import 'screens/timetable_screen.dart';
 
 // Custom Color Palette
 const Color c1 = Color(0xFF696D7D);
@@ -79,7 +80,7 @@ class HomePage extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // Manage Courses
+            // Manage Courses (ONLY course add/edit/delete)
             _menuButton(
               context,
               title: "Manage Courses",
@@ -88,14 +89,16 @@ class HomePage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const CourseListScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const CourseListScreen(),
+                  ),
                 );
               },
             ),
 
             const SizedBox(height: 20),
 
-            // Manage Routine
+            // Manage Routine (select course -> routines)
             _menuButton(
               context,
               title: "Manage Routine",
@@ -104,14 +107,16 @@ class HomePage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const CourseListScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const CourseSelectRoutineScreen(),
+                  ),
                 );
               },
             ),
 
             const SizedBox(height: 20),
 
-            // View Timetable
+            // Weekly Timetable
             _menuButton(
               context,
               title: "View Timetable",
@@ -120,7 +125,9 @@ class HomePage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const TimetableScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const TimetableScreen(),
+                  ),
                 );
               },
             ),
@@ -130,7 +137,6 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Styled menu button widget
   Widget _menuButton(
     BuildContext context, {
     required String title,

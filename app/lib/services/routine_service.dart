@@ -1,28 +1,50 @@
-// lib/services/routine_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/routine.dart';
 
 class RoutineService {
-  final CollectionReference _routinesRef =
+  final CollectionReference _routineRef =
       FirebaseFirestore.instance.collection('routines');
 
-  Stream<List<Routine>> streamRoutinesForCourse(String courseId) {
-    return _routinesRef
-        .where('courseId', isEqualTo: courseId)
-        .orderBy('day')
-        .snapshots()
-        .map((snap) => snap.docs.map((d) => Routine.fromDocument(d)).toList());
+  // Stream all routines
+  Stream<List<Routine>> streamRoutines() {
+    return _routineRef.snapshots().map(
+      (snapshot) =>
+          snapshot.docs.map((doc) => Routine.fromDocument(doc)).toList(),
+    );
   }
 
-  Future<DocumentReference> addRoutine(Routine routine) {
-    return _routinesRef.add(routine.toMap());
+  // Add new routine
+  Future<void> addRoutine({
+    required String courseId,
+    required String day,
+    required String startTime,
+    required String endTime,
+  }) async {
+    await _routineRef.add({
+      'courseId': courseId,
+      'day': day,
+      'startTime': startTime,
+      'endTime': endTime,
+    });
   }
 
-  Future<void> updateRoutine(String id, Routine routine) {
-    return _routinesRef.doc(id).update(routine.toMap());
+  // Update existing routine
+  Future<void> updateRoutine({
+    required String id,
+    required String day,
+    required String startTime,
+    required String endTime,
+  }) async {
+    await _routineRef.doc(id).update({
+      'day': day,
+      'startTime': startTime,
+      'endTime': endTime,
+    });
   }
 
-  Future<void> deleteRoutine(String id) {
-    return _routinesRef.doc(id).delete();
+  // Delete routine
+  Future<void> deleteRoutine(String id) async {
+    await _routineRef.doc(id).delete();
   }
 }
+

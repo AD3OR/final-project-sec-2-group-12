@@ -4,17 +4,11 @@ class Course {
   final String id;
   final String name;
   final String code;
-  final String day;
-  final String startTime;
-  final String endTime;
 
   Course({
     required this.id,
     required this.name,
     required this.code,
-    required this.day,
-    required this.startTime,
-    required this.endTime,
   });
 
   factory Course.fromDocument(DocumentSnapshot doc) {
@@ -23,9 +17,6 @@ class Course {
       id: doc.id,
       name: data['name'] ?? '',
       code: data['code'] ?? '',
-      day: data['day'] ?? '',
-      startTime: data['startTime'] ?? '',
-      endTime: data['endTime'] ?? '',
     );
   }
 
@@ -33,9 +24,7 @@ class Course {
     return {
       'name': name,
       'code': code,
-      'day': day,
-      'startTime': startTime,
-      'endTime': endTime,
     };
   }
 }
+

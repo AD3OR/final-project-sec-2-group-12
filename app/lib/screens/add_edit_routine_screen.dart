@@ -1,14 +1,19 @@
-// lib/screens/add_edit_routine_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/routine.dart';
 import '../providers/routine_provider.dart';
+import '../theme/colors.dart';
 
 class AddEditRoutineScreen extends StatefulWidget {
   final Routine? editingRoutine;
-  final String? courseId; // required when creating
+  final String courseId;
 
-  const AddEditRoutineScreen({super.key, this.editingRoutine, this.courseId});
+  const AddEditRoutineScreen({
+    super.key,
+    this.editingRoutine,
+    required this.courseId,
+  });
 
   @override
   State<AddEditRoutineScreen> createState() => _AddEditRoutineScreenState();
@@ -16,20 +21,27 @@ class AddEditRoutineScreen extends StatefulWidget {
 
 class _AddEditRoutineScreenState extends State<AddEditRoutineScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameCtrl = TextEditingController();
   final _startCtrl = TextEditingController();
   final _endCtrl = TextEditingController();
-  String _day = 'Monday';
+
+  String _day = "Monday";
   bool _saving = false;
 
-  final _days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  final List<String> _days = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
 
   @override
   void initState() {
     super.initState();
     if (widget.editingRoutine != null) {
       final r = widget.editingRoutine!;
-      _nameCtrl.text = r.name;
       _day = r.day;
       _startCtrl.text = r.startTime;
       _endCtrl.text = r.endTime;
@@ -38,7 +50,6 @@ class _AddEditRoutineScreenState extends State<AddEditRoutineScreen> {
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
     _startCtrl.dispose();
     _endCtrl.dispose();
     super.dispose();
@@ -46,69 +57,96 @@ class _AddEditRoutineScreenState extends State<AddEditRoutineScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+
     setState(() => _saving = true);
+
     final provider = Provider.of<RoutineProvider>(context, listen: false);
-    final routine = Routine(
-      id: widget.editingRoutine?.id ?? '',
-      name: _nameCtrl.text.trim(),
-      day: _day,
-      startTime: _startCtrl.text.trim(),
-      endTime: _endCtrl.text.trim(),
-      courseId: widget.editingRoutine?.courseId ?? widget.courseId ?? '',
-    );
+
     try {
       if (widget.editingRoutine == null) {
-        await provider.addRoutine(routine);
+        await provider.addRoutine(
+          courseId: widget.courseId,
+          day: _day,
+          startTime: _startCtrl.text.trim(),
+          endTime: _endCtrl.text.trim(),
+        );
       } else {
-        await provider.updateRoutine(routine.id, routine);
+        await provider.updateRoutine(
+          id: widget.editingRoutine!.id,
+          day: _day,
+          startTime: _startCtrl.text.trim(),
+          endTime: _endCtrl.text.trim(),
+        );
       }
       if (mounted) Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
 
+  InputDecoration field(String label) {
+    return InputDecoration(
+      labelText: label,
+      filled: true,
+      fillColor: c4.withOpacity(0.25),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isEditing = widget.editingRoutine != null;
+    final editing = widget.editingRoutine != null;
+
     return Scaffold(
-      appBar: AppBar(title: Text(isEditing ? 'Edit Routine' : 'Add Routine')),
+      backgroundColor: c5,
+      appBar: AppBar(
+        backgroundColor: c2,
+        title: Text(
+          editing ? "Edit Routine" : "Add Routine",
+          style: const TextStyle(color: Colors.white),
+        ),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(
-                controller: _nameCtrl,
-                decoration: const InputDecoration(labelText: 'Routine title'),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Enter title' : null,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
+              DropdownButtonFormField(
                 value: _day,
-                items: _days.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
-                onChanged: (v) { if (v != null) setState(() => _day = v); },
-                decoration: const InputDecoration(labelText: 'Day'),
+                decoration: field("Day"),
+                items: _days
+                    .map((d) => DropdownMenuItem(value: d, child: Text(d)))
+                    .toList(),
+                onChanged: (v) => setState(() => _day = v!),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _startCtrl,
-                decoration: const InputDecoration(labelText: 'Start time, e.g. 09:00'),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Enter start time' : null,
+                decoration: field("Start time (e.g. 09:00)"),
+                validator: (v) => v == null || v.isEmpty ? "Required" : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _endCtrl,
-                decoration: const InputDecoration(labelText: 'End time, e.g. 10:30'),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Enter end time' : null,
+                decoration: field("End time (e.g. 10:30)"),
+                validator: (v) => v == null || v.isEmpty ? "Required" : null,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               _saving
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(onPressed: _save, child: Text(isEditing ? 'Save' : 'Create')),
+                  ? CircularProgressIndicator(color: c2)
+                  : SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: c2,
+                        ),
+                        onPressed: _save,
+                        child:
+                            Text(editing ? "Save Changes" : "Create Routine"),
+                      ),
+                    ),
             ],
           ),
         ),

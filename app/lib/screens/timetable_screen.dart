@@ -1,85 +1,101 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/course_provider.dart';
 import '../models/course.dart';
+import '../models/routine.dart';
+import '../providers/course_provider.dart';
+import '../providers/routine_provider.dart';
 import '../theme/colors.dart';
-import 'course_detail_screen.dart';
 
 class TimetableScreen extends StatelessWidget {
   const TimetableScreen({super.key});
 
-  final List<String> _days = const [
+  static const List<String> days = [
     "Monday",
     "Tuesday",
     "Wednesday",
     "Thursday",
     "Friday",
     "Saturday",
-    "Sunday"
+    "Sunday",
   ];
 
   @override
   Widget build(BuildContext context) {
+    final routineProvider = Provider.of<RoutineProvider>(context, listen: false);
     final courseProvider = Provider.of<CourseProvider>(context, listen: false);
 
     return Scaffold(
       backgroundColor: c5,
       appBar: AppBar(
         backgroundColor: c2,
-        title: const Text("Weekly Timetable", style: TextStyle(color: Colors.white)),
+        title: const Text(
+          "Weekly Timetable",
+          style: TextStyle(color: Colors.white),
+        ),
       ),
-      body: StreamBuilder<List<Course>>(
-        stream: courseProvider.coursesStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          }
-          if (!snapshot.hasData) {
+      body: StreamBuilder<List<Routine>>(
+        stream: routineProvider.routinesStream,
+        builder: (context, routineSnapshot) {
+          if (!routineSnapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final courses = snapshot.data!;
+          final routines = routineSnapshot.data!;
 
-          // Group courses by day
-          final Map<String, List<Course>> grouped = {};
-          for (var day in _days) {
-            grouped[day] = courses.where((c) => c.day == day).toList();
-          }
+          return StreamBuilder<List<Course>>(
+            stream: courseProvider.coursesStream,
+            builder: (context, courseSnapshot) {
+              if (!courseSnapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: _days.length,
-            itemBuilder: (context, index) {
-              final day = _days[index];
-              final dayCourses = grouped[day] ?? [];
+              final courses = courseSnapshot.data!;
+              final courseMap = {
+                for (var c in courses) c.id: c,
+              };
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    day,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: c1,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: days.length,
+                itemBuilder: (context, index) {
+                  final day = days[index];
+                  final dayRoutines =
+                      routines.where((r) => r.day == day).toList();
 
-                  if (dayCourses.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8, bottom: 20),
-                      child: Text(
-                        "No classes",
-                        style: TextStyle(color: c1.withOpacity(0.7)),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        day,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: c1,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 8),
 
-                  ...dayCourses.map((course) => _courseCard(context, course)).toList(),
+                      if (dayRoutines.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8, bottom: 16),
+                          child: Text(
+                            "No classes",
+                            style: TextStyle(color: c1.withOpacity(0.6)),
+                          ),
+                        ),
 
-                  const SizedBox(height: 25),
-                ],
+                      ...dayRoutines.map((routine) {
+                        final course = courseMap[routine.courseId];
+                        if (course == null) return const SizedBox();
+
+                        return _routineCard(course, routine);
+                      }).toList(),
+
+                      const SizedBox(height: 24),
+                    ],
+                  );
+                },
               );
             },
           );
@@ -88,42 +104,34 @@ class TimetableScreen extends StatelessWidget {
     );
   }
 
-  Widget _courseCard(BuildContext context, Course course) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => CourseDetailScreen(course: course)),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: c4,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              course.name,
-              style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+  Widget _routineCard(Course course, Routine routine) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: c4,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            course.name,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 4),
-            Text(
-              course.code,
-              style: TextStyle(color: Colors.black.withOpacity(0.7)),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              "${course.startTime} - ${course.endTime}",
-              style: TextStyle(
-                  fontSize: 14, color: Colors.black.withOpacity(0.8)),
-            ),
-          ],
-        ),
+          ),
+          Text(
+            course.code,
+            style: TextStyle(color: Colors.black.withOpacity(0.7)),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            "${routine.startTime} - ${routine.endTime}",
+            style: TextStyle(color: Colors.black.withOpacity(0.8)),
+          ),
+        ],
       ),
     );
   }
