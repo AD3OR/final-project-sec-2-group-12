@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Attendance App',
-        home: const FacultyLoginPage(),
+        home: const HomePage(),
       ),
     );
   }
