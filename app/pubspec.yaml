@@ -1,6 +1,6 @@
 name: app
 description: A Flutter app for course management
-publish_to: 'none' # change if you plan to publish
+publish_to: 'none' 
 
 version: 1.0.0+1
 
@@ -31,7 +31,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
-  # If you have assets, list them here. Example:
-  # assets:
-  #   - assets/images/
