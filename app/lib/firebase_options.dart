@@ -83,4 +83,5 @@ class DefaultFirebaseOptions {
     authDomain: 'csc464-p006.firebaseapp.com',
     storageBucket: 'csc464-p006.firebasestorage.app',
   );
+
 }

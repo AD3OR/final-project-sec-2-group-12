@@ -22,6 +22,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  print("Firebase initialized!");
 
   runApp(const MyApp());
 }
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Attendance App',
-        home: const HomePage(),
+        home: const FacultyLoginPage(),
       ),
     );
   }
