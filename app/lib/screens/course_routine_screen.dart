@@ -4,8 +4,9 @@ import 'package:provider/provider.dart';
 import '../models/course.dart';
 import '../models/routine.dart';
 import '../providers/routine_provider.dart';
-import '../theme/colors.dart';
+import '../theme/colors.dart' as colors;
 import 'add_edit_routine_screen.dart';
+import 'student_screen.dart';
 import '../widgets/routine_tile.dart';
 
 class CourseDetailScreen extends StatelessWidget {
@@ -17,14 +18,32 @@ class CourseDetailScreen extends StatelessWidget {
     final routineProvider = Provider.of<RoutineProvider>(context, listen: false);
 
     return Scaffold(
-      backgroundColor: c5,
+      backgroundColor: colors.c5,
       appBar: AppBar(
-        backgroundColor: c2,
-        title:
-            Text(course.name, style: const TextStyle(color: Colors.white)),
+        backgroundColor: colors.c2,
+        title: Text(
+          course.name,
+          style: const TextStyle(color: Colors.white),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.group),
+            tooltip: "Manage Students",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StudentScreen(courseId: course.id),
+                ),
+              );
+            },
+          ),
+        ],
       ),
+
       floatingActionButton: FloatingActionButton(
-        backgroundColor: c2,
+        backgroundColor: colors.c2,
+        tooltip: "Add Routine",
         onPressed: () {
           Navigator.push(
             context,
@@ -36,11 +55,16 @@ class CourseDetailScreen extends StatelessWidget {
         },
         child: const Icon(Icons.add),
       ),
+
       body: StreamBuilder<List<Routine>>(
         stream: routineProvider.routinesStream,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData) {
+            return const Center(child: Text("Something went wrong"));
           }
 
           final routines = snapshot.data!
@@ -48,7 +72,9 @@ class CourseDetailScreen extends StatelessWidget {
               .toList();
 
           if (routines.isEmpty) {
-            return const Center(child: Text("No routines added yet"));
+            return const Center(
+              child: Text("No routines added yet"),
+            );
           }
 
           return ListView.builder(

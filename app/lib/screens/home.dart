@@ -7,14 +7,12 @@ import '../providers/attendance_provider.dart';
 import '../providers/course_provider.dart';
 import '../providers/routine_provider.dart';
 
-// Existing screens
-import '../models/students.dart';
-import '../models/att.dart';
-
 // Course & routine screens
 import 'course_list_screen.dart';
 import 'course_select_routine_screen.dart';
 import 'timetable_screen.dart';
+
+
 
 // Custom Color Palette
 const Color c1 = Color(0xFF696D7D);
@@ -42,42 +40,6 @@ class HomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 20),
-
-            // Manage Students
-            _menuButton(
-              context,
-              title: "Manage Students",
-              icon: Icons.group,
-              color: c1,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => StudentsPage(courseId: "COURSE_001"),
-                  ),
-                );
-              },
-            ),
-
-            const SizedBox(height: 20),
-
-            // Take Attendance
-            _menuButton(
-              context,
-              title: "Take Attendance",
-              icon: Icons.check_circle,
-              color: c3,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AttendancePage(courseId: "COURSE_001"),
-                  ),
-                );
-              },
-            ),
-
             const SizedBox(height: 20),
 
             // Manage Courses (ONLY course add/edit/delete)

@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/course_provider.dart';
 import '../models/course.dart';
 import '../theme/colors.dart';
-import 'course_detail_screen.dart';
+import 'course_routine_screen.dart';
 
 class CourseSelectRoutineScreen extends StatelessWidget {
   const CourseSelectRoutineScreen({super.key});

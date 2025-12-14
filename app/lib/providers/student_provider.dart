@@ -2,71 +2,71 @@ import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class StudentProvider with ChangeNotifier {
-  final _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   List<Map<String, dynamic>> students = [];
 
-  final bool _isLoading = false;
-
+  bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  // Fetch students of a course
+// Fetch
   Future<void> fetchStudents(String courseId) async {
-    final snap = await _db
+    _isLoading = true;
+    notifyListeners();
+
+    final snapshot = await _db
         .collection('students')
-        .doc(courseId)
-        .collection('students')
+        .where('courseId', isEqualTo: courseId)
         .get();
 
-    students = snap.docs.map((e) => e.data()).toList();
+    students = snapshot.docs.map((doc) {
+      return {
+        'docId': doc.id, // IMPORTANT
+        ...doc.data(),
+      };
+    }).toList();
+
+    _isLoading = false;
     notifyListeners();
   }
-
-  // Add student
+// Add
   Future<void> addStudent(
     String courseId,
     String name,
-    String studentId,
+    String id,
   ) async {
-    await _db
-        .collection('students')
-        .doc(courseId)
-        .collection('students')
-        .doc(studentId)
-        .set({'studentName': name, 'studentId': studentId});
+    await _db.collection('students').add({
+      'studentName': name,
+      'studentId': int.parse(id),
+      'courseId': courseId,
+    });
 
-    students.add({'studentName': name, 'studentId': studentId});
-    notifyListeners();
+    await fetchStudents(courseId);
   }
 
-  // Edit student
+// Edit
   Future<void> editStudent(
+    String docId,
     String courseId,
-    String studentId,
     String newName,
   ) async {
-    await _db
-        .collection('students')
-        .doc(courseId)
-        .collection('students')
-        .doc(studentId)
-        .update({'studentName': newName});
+    await _db.collection('students').doc(docId).update({
+      'studentName': newName,
+    });
 
-    final index = students.indexWhere((s) => s['studentId'] == studentId);
-    students[index]['studentName'] = newName;
-    notifyListeners();
+    final index = students.indexWhere((s) => s['docId'] == docId);
+    if (index != -1) {
+      students[index]['studentName'] = newName;
+      notifyListeners();
+    }
   }
 
-  // Delete student
-  Future<void> deleteStudent(String courseId, String studentId) async {
-    await _db
-        .collection('students')
-        .doc(courseId)
-        .collection('students')
-        .doc(studentId)
-        .delete();
-
-    students.removeWhere((s) => s['studentId'] == studentId);
-    notifyListeners();
+// Delete
+  Future<void> deleteStudent(
+    String docId,
+    String courseId,
+  ) async {
+    await _db.collection('students').doc(docId).delete();
+    await fetchStudents(courseId);
   }
 }

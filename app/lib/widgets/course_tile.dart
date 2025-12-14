@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../models/course.dart';
 import '../providers/course_provider.dart';
 import '../screens/add_edit_course_screen.dart';
-import '../screens/course_detail_screen.dart';
+import '../screens/course_routine_screen.dart';
 import '../theme/colors.dart';
 
 class CourseTile extends StatelessWidget {
