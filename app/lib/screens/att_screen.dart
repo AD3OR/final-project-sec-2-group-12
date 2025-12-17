@@ -68,7 +68,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               final data = students[index].data() as Map<String, dynamic>;
 
               final String studentName = data['studentName'] ?? 'No Name';
-              final int studentId = data['studentId']; // ✅ consistent key
+              final int studentId = data['studentId'];
+              studentNames[studentId] = studentName;
+
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -147,7 +149,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         courseId: widget.courseId,
         routineId: widget.routineId,
         date: widget.date,
-        status: isPresent ? "Present" : "Absent", studentName: '',
+        status: isPresent ? "Present" : "Absent", 
+        studentName: studentNames[entry.key] ?? 'Unknown',
       );
     }).toList();
 

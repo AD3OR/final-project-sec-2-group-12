@@ -20,9 +20,7 @@ class AttendanceLogScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AttendanceProvider>(context, listen: false);
-    final now = DateTime.now();
-    final startOfDay = DateTime(now.year, now.month, now.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
+    
 
     return Scaffold(
       backgroundColor: c5,
@@ -31,11 +29,7 @@ class AttendanceLogScreen extends StatelessWidget {
         title: const Text("Attendance Log"),
       ),
       body: StreamBuilder<List<Attendance>>(
-        stream: provider.attendanceByRoutine(
-          routineId,
-          startOfDay,
-          endOfDay,
-        ),
+        stream: provider.attendanceByRoutine(routineId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

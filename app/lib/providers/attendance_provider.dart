@@ -16,18 +16,14 @@ class AttendanceProvider with ChangeNotifier {
     await batch.commit();
   }
 
-  Stream<List<Attendance>> attendanceByRoutine(
-    String routineId,
-    DateTime start,
-    DateTime end,
-  ) {
+  Stream<List<Attendance>> attendanceByRoutine(String routineId) {
     return FirebaseFirestore.instance
         .collection('attendance')
         .where('routineId', isEqualTo: routineId)
-        .where('date', isGreaterThanOrEqualTo: start)
-        .where('date', isLessThan: end)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((d) => Attendance.fromFirestore(d)).toList());
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((d) => Attendance.fromMap(d.data())).toList(),
+        );
   }
 }
