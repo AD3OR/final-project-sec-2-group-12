@@ -1,42 +1,36 @@
+import 'package:app/models/att.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AttendanceProvider with ChangeNotifier {
   final _db = FirebaseFirestore.instance;
 
-  Map<String, String> attendanceStatus = {}; // { studentId: "Present/Absent" }
+  Future<void> saveAttendance(List<Attendance> records) async {
+    final batch = _db.batch();
 
-  // Load attendance for a specific date
-  Future<void> loadAttendance(String courseId, String date) async {
-    final doc = await _db
-        .collection('attendance')
-        .doc(courseId)
-        .collection('dates')
-        .doc(date)
-        .get();
-
-    if (doc.exists) {
-      attendanceStatus = Map<String, String>.from(doc['status']);
-    } else {
-      attendanceStatus = {};
+    for (final record in records) {
+      final doc = _db.collection('attendance').doc();
+      batch.set(doc, record.toMap());
     }
 
-    notifyListeners();
+    await batch.commit();
   }
 
-  // Mark student present/absent locally
-  void mark(String studentId, String value) {
-    attendanceStatus[studentId] = value;
-    notifyListeners();
-  }
+  Stream<List<Attendance>> attendanceByRoutine(
+    String routineId,
+    DateTime date,
+  ) {
+    final start = DateTime(date.year, date.month, date.day);
+    final end = start.add(const Duration(days: 1));
 
-  // Save to Firebase
-  Future<void> saveAttendance(String courseId, String date) async {
-    await _db
+    return _db
         .collection('attendance')
-        .doc(courseId)
-        .collection('dates')
-        .doc(date)
-        .set({'status': attendanceStatus});
+        .where('routineId', isEqualTo: routineId)
+        .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+        .where('date', isLessThan: Timestamp.fromDate(end))
+        .snapshots()
+        .map((snap) =>
+            snap.docs.map((d) => Attendance.fromMap(d.data())).toList());
   }
 }
+

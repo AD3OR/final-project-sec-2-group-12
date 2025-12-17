@@ -11,7 +11,7 @@ import '../providers/routine_provider.dart';
 import 'course_list_screen.dart';
 import 'course_select_routine_screen.dart';
 import 'timetable_screen.dart';
-
+import 'cr_att_rec_screen.dart';
 
 
 // Custom Color Palette
@@ -89,6 +89,23 @@ class HomePage extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => const TimetableScreen(),
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 20),
+
+            _menuButton(
+              context,
+              title: "Attendance Records",
+              icon: Icons.fact_check,
+              color: c1,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const CourseAttendanceRecordScreen(),
                   ),
                 );
               },

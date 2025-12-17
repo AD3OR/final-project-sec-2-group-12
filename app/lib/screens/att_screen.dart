@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/att.dart';
 
+import 'package:provider/provider.dart';
+import '../providers/attendance_provider.dart';
+
 // Color Palette
 const Color c1 = Color(0xFF696D7D);
 const Color c2 = Color(0xFF6F9283);
@@ -28,7 +31,7 @@ class AttendanceScreen extends StatefulWidget {
 class _AttendanceScreenState extends State<AttendanceScreen> {
   /// studentId -> present/absent
   final Map<int, bool> attendanceStatus = {};
-
+  final Map<int, String> studentNames = {};
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,13 +65,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             padding: const EdgeInsets.all(16),
             itemCount: students.length,
             itemBuilder: (context, index) {
-              final data =
-                  students[index].data() as Map<String, dynamic>;
+              final data = students[index].data() as Map<String, dynamic>;
 
-              final String studentName =
-                  data['studentName'] ?? 'No Name';
-              final int studentId =
-                  data['studentId']; // ✅ consistent key
+              final String studentName = data['studentName'] ?? 'No Name';
+              final int studentId = data['studentId']; // ✅ consistent key
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -98,7 +98,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         ],
                       ),
                     ),
-
                     Checkbox(
                       activeColor: c1,
                       value: attendanceStatus[studentId] ?? false,
@@ -138,11 +137,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   // ================= SUBMIT LOGIC =================
-  void _submitAttendance() {
-    final List<Attendance> records =
-        attendanceStatus.entries.map((entry) {
+  void _submitAttendance() async {
+    final provider = Provider.of<AttendanceProvider>(context, listen: false);
+
+    final records = attendanceStatus.entries.map((entry) {
       return Attendance(
         studentId: entry.key,
+        studentName: studentNames[entry.key]!, // cache names while loading
         courseId: widget.courseId,
         routineId: widget.routineId,
         date: widget.date,
@@ -150,15 +151,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       );
     }).toList();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          "${records.length} attendance records prepared",
-        ),
-      ),
-    );
+    await provider.saveAttendance(records);
 
-    // Next step:
-    // AttendanceProvider.saveAttendance(records);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Attendance saved")),
+    );
   }
 }

@@ -1,33 +1,41 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Attendance {
   final int studentId;
+  final String studentName;
   final String courseId;
+  final String routineId;
   final DateTime date;
-  final String status; // "Present" or "Absent"
+  final String status;
 
   Attendance({
     required this.studentId,
+    required this.studentName,
     required this.courseId,
+    required this.routineId,
     required this.date,
-    required this.status, required String routineId,
+    required this.status,
   });
 
-  /// Convert Attendance → Firestore Map
   Map<String, dynamic> toMap() {
     return {
       'studentId': studentId,
+      'studentName': studentName,
       'courseId': courseId,
-      'date': date.toIso8601String(),
+      'routineId': routineId,
+      'date': Timestamp.fromDate(date),
       'status': status,
     };
   }
 
-  /// Convert Firestore Map → Attendance
   factory Attendance.fromMap(Map<String, dynamic> map) {
     return Attendance(
       studentId: map['studentId'],
+      studentName: map['studentName'],
       courseId: map['courseId'],
-      date: DateTime.parse(map['date']),
-      status: map['status'], routineId: '',
+      routineId: map['routineId'],
+      date: (map['date'] as Timestamp).toDate(),
+      status: map['status'],
     );
   }
 }
