@@ -17,6 +17,21 @@ class Attendance {
     required this.status,
   });
 
+  factory Attendance.fromFirestore(
+      QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data();
+
+    return Attendance(
+      studentId: data['studentId'],
+      studentName: data['studentName'],
+      courseId: data['courseId'],
+      routineId: data['routineId'],
+      date: (data['date'] as Timestamp).toDate(),
+      status: data['status'],
+    );
+  }
+
+  // optional 
   Map<String, dynamic> toMap() {
     return {
       'studentId': studentId,
@@ -26,16 +41,5 @@ class Attendance {
       'date': Timestamp.fromDate(date),
       'status': status,
     };
-  }
-
-  factory Attendance.fromMap(Map<String, dynamic> map) {
-    return Attendance(
-      studentId: map['studentId'],
-      studentName: map['studentName'],
-      courseId: map['courseId'],
-      routineId: map['routineId'],
-      date: (map['date'] as Timestamp).toDate(),
-      status: map['status'],
-    );
   }
 }

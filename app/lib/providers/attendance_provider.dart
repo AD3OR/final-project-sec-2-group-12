@@ -18,19 +18,16 @@ class AttendanceProvider with ChangeNotifier {
 
   Stream<List<Attendance>> attendanceByRoutine(
     String routineId,
-    DateTime date,
+    DateTime start,
+    DateTime end,
   ) {
-    final start = DateTime(date.year, date.month, date.day);
-    final end = start.add(const Duration(days: 1));
-
-    return _db
+    return FirebaseFirestore.instance
         .collection('attendance')
         .where('routineId', isEqualTo: routineId)
-        .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
-        .where('date', isLessThan: Timestamp.fromDate(end))
+        .where('date', isGreaterThanOrEqualTo: start)
+        .where('date', isLessThan: end)
         .snapshots()
-        .map((snap) =>
-            snap.docs.map((d) => Attendance.fromMap(d.data())).toList());
+        .map((snapshot) =>
+            snapshot.docs.map((d) => Attendance.fromFirestore(d)).toList());
   }
 }
-

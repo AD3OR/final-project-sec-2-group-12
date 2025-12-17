@@ -44,7 +44,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         ),
       ),
 
-      // ================= STUDENT LIST =================
+    
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection("students")
@@ -137,24 +137,35 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   // ================= SUBMIT LOGIC =================
-  void _submitAttendance() async {
-    final provider = Provider.of<AttendanceProvider>(context, listen: false);
+  void _submitAttendance() {
+    final List<Attendance> records =
+        attendanceStatus.entries.where((e) => e.key != null).map((entry) {
+      final bool isPresent = entry.value ?? false;
 
-    final records = attendanceStatus.entries.map((entry) {
       return Attendance(
         studentId: entry.key,
-        studentName: studentNames[entry.key]!, // cache names while loading
         courseId: widget.courseId,
         routineId: widget.routineId,
         date: widget.date,
-        status: entry.value ? "Present" : "Absent",
+        status: isPresent ? "Present" : "Absent", studentName: '',
       );
     }).toList();
 
-    await provider.saveAttendance(records);
+    if (records.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No attendance selected")),
+      );
+      return;
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Attendance saved")),
+      SnackBar(
+        content: Text("${records.length} attendance records prepared"),
+      ),
     );
+
+  
+    Provider.of<AttendanceProvider>(context, listen: false)
+      .saveAttendance(records);
   }
 }

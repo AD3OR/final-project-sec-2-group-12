@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
-
 import '../theme/colors.dart';
 import '../widgets/att_tile.dart';
 
@@ -21,7 +20,9 @@ class AttendanceLogScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AttendanceProvider>(context, listen: false);
-    final today = DateTime.now();
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
 
     return Scaffold(
       backgroundColor: c5,
@@ -30,17 +31,25 @@ class AttendanceLogScreen extends StatelessWidget {
         title: const Text("Attendance Log"),
       ),
       body: StreamBuilder<List<Attendance>>(
-        stream: provider.attendanceByRoutine(routineId, today),
+        stream: provider.attendanceByRoutine(
+          routineId,
+          startOfDay,
+          endOfDay,
+        ),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text("No attendance recorded"));
           }
 
           final records = snapshot.data!;
 
-          if (records.isEmpty) {
-            return const Center(child: Text("No attendance recorded"));
-          }
+          // if (records.isEmpty) {
+          //   return const Center(child: Text("No attendance recorded"));
+          // }
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -75,9 +84,8 @@ class AttendanceLogScreen extends StatelessWidget {
                       a.status,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: a.status == "Present"
-                            ? Colors.green
-                            : Colors.red,
+                        color:
+                            a.status == "Present" ? Colors.green : Colors.red,
                       ),
                     ),
                   ],
