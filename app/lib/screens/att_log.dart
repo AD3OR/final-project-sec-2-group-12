@@ -1,11 +1,10 @@
 import 'package:app/models/att.dart';
 import 'package:app/providers/attendance_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 import '../theme/colors.dart';
-import '../widgets/att_tile.dart';
 
 class AttendanceLogScreen extends StatelessWidget {
   final String routineId;
@@ -20,7 +19,6 @@ class AttendanceLogScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AttendanceProvider>(context, listen: false);
-    
 
     return Scaffold(
       backgroundColor: c5,
@@ -40,10 +38,7 @@ class AttendanceLogScreen extends StatelessWidget {
           }
 
           final records = snapshot.data!;
-
-          // if (records.isEmpty) {
-          //   return const Center(child: Text("No attendance recorded"));
-          // }
+          final dateFormatter = DateFormat('dd MMM yyyy • hh:mm a');
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -60,26 +55,50 @@ class AttendanceLogScreen extends StatelessWidget {
                       : Colors.red.shade100,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          a.studentName,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        Text("ID: ${a.studentId}"),
-                      ],
-                    ),
+                    // ───── Student Name ─────
                     Text(
-                      a.status,
-                      style: TextStyle(
+                      a.studentName,
+                      style: const TextStyle(
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color:
-                            a.status == "Present" ? Colors.green : Colors.red,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    // ───── Student ID ─────
+                    Text(
+                      "ID: ${a.studentId}",
+                      style: const TextStyle(fontSize: 14),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    // ───── Date ─────
+                    Text(
+                      dateFormatter.format(a.date),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.black54,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // ───── Status Badge ─────
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        a.status,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: a.status == "Present"
+                              ? Colors.green.shade800
+                              : Colors.red.shade800,
+                        ),
                       ),
                     ),
                   ],

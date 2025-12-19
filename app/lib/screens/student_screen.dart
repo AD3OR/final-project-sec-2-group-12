@@ -21,8 +21,12 @@ class _StudentScreenState extends State<StudentScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<StudentProvider>(context, listen: false)
-        .fetchStudents(widget.courseId);
+
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<StudentProvider>(context, listen: false)
+          .fetchStudents(widget.courseId);
+    });
   }
 
   @override

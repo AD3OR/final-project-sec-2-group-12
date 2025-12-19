@@ -25,20 +25,6 @@ class CourseDetailScreen extends StatelessWidget {
           course.name,
           style: const TextStyle(color: Colors.white),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.group),
-            tooltip: "Manage Students",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => StudentScreen(courseId: course.id),
-                ),
-              );
-            },
-          ),
-        ],
       ),
 
       floatingActionButton: FloatingActionButton(
@@ -48,43 +34,83 @@ class CourseDetailScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) =>
-                  AddEditRoutineScreen(courseId: course.id),
+              builder: (_) => AddEditRoutineScreen(courseId: course.id),
             ),
           );
         },
         child: const Icon(Icons.add),
       ),
 
-      body: StreamBuilder<List<Routine>>(
-        stream: routineProvider.routinesStream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (!snapshot.hasData) {
-            return const Center(child: Text("Something went wrong"));
-          }
-
-          final routines = snapshot.data!
-              .where((r) => r.courseId == course.id)
-              .toList();
-
-          if (routines.isEmpty) {
-            return const Center(
-              child: Text("No routines added yet"),
-            );
-          }
-
-          return ListView.builder(
+      body: Column(
+        children: [
+          
+          Padding(
             padding: const EdgeInsets.all(16),
-            itemCount: routines.length,
-            itemBuilder: (context, index) {
-              return RoutineTile(routine: routines[index]);
-            },
-          );
-        },
+            child: SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.c2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                icon: const Icon(Icons.group, color: Colors.white),
+                label: const Text(
+                  "Manage Students",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => StudentScreen(courseId: course.id),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          
+          Expanded(
+            child: StreamBuilder<List<Routine>>(
+              stream: routineProvider.routinesStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData) {
+                  return const Center(child: Text("Something went wrong"));
+                }
+
+                final routines = snapshot.data!
+                    .where((r) => r.courseId == course.id)
+                    .toList();
+
+                if (routines.isEmpty) {
+                  return const Center(
+                    child: Text("No routines added yet"),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  itemCount: routines.length,
+                  itemBuilder: (context, index) {
+                    return RoutineTile(routine: routines[index]);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
